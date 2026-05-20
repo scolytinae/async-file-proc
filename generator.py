@@ -6,14 +6,23 @@ from pathlib import Path
 
 OUTPUT_DIR = "generated"
 FILES_COUNT = 20
-MIN_FILE_TEXT_LENGTH = 2 * 1024 * 1024
-MAX_FILE_TEXT_LENGTH = 10 * 1024 * 1024
 
-async def generate_file(file_name: str, text_length: int) -> None:
-    random_str = ''.join(random.choices(string.ascii_lowercase, k=text_length))
+MIN_WORD_SIZE=4
+MAX_WORD_SIZE=15
+MIN_FILE_WORDS_COUNT = 2  * 1024
+MAX_FILE_WORDS_COUNT = 10 * 1024
+
+async def generate_file(file_name: str, words_count: int) -> None:
     async with aiofiles.open(file_name, "w") as f:
-        await f.write(random_str)
-    
+        for _ in range(words_count - 1):
+            word_length = random.randint(MIN_WORD_SIZE, MAX_WORD_SIZE)
+            random_str = ''.join(random.choices(string.ascii_lowercase, k=word_length))
+            await f.write(random_str + ' ')
+
+        word_length = random.randint(MIN_WORD_SIZE, MAX_WORD_SIZE)
+        random_str = ''.join(random.choices(string.ascii_lowercase, k=word_length))
+        await f.write(random_str + ' ')
+
     print(f"File '{file_name}' generated!")
 
 async def main() -> None:
@@ -23,7 +32,7 @@ async def main() -> None:
     gen_functions = [ 
         generate_file(
             files_dir / f"file_{i}.txt",
-            random.randint(MIN_FILE_TEXT_LENGTH, MAX_FILE_TEXT_LENGTH)
+            random.randint(MIN_FILE_WORDS_COUNT, MAX_FILE_WORDS_COUNT)
         ) 
         for i in range(FILES_COUNT) 
     ]
