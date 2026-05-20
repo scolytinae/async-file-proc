@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from itertools import chain
 from reader import ThreadedReader
 from processor import Processor
 
@@ -25,9 +26,11 @@ async def main():
                 processor_stop_event.set()
 
     except* ValueError as eg:
-        print(f"errors: {eg.exceptions}") 
+        logging.warning(f"Errors in tasks: {eg.exceptions}") 
     else:
-        print(f"Results: {process_task.result()}")
+        results = list(chain.from_iterable(process_task.result()))
+        logging.debug(f"Get {len(results)} results")
+        # to do save results to json
 
 
 if __name__ == "__main__":
