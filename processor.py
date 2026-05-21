@@ -39,10 +39,10 @@ class Processor:
             average_word_length=statistics.median(words_len)
         )
 
-    def processed_count(self):
+    def processed_count(self) -> int:
         return self.__processed_count
 
-    async def _process(self, executor: ProcessPoolExecutor) -> FileProcessingResult | None:
+    async def _process(self, executor: ProcessPoolExecutor) -> List[FileProcessingResult]:
         results = []
         while not self.__stop_event.is_set():
             try:
@@ -66,7 +66,7 @@ class Processor:
         
         return results
 
-    async def process(self) -> None:
+    async def process(self) -> List[FileProcessingResult]:
         with ProcessPoolExecutor(max_workers=self.__workers_count) as executor:
             process_functions = [ self._process(executor) for _ in range(self.__workers_count) ]
             return await asyncio.gather(*process_functions)

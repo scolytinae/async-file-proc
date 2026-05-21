@@ -3,12 +3,14 @@ import logging
 from itertools import chain
 from reader import ThreadedReader
 from processor import Processor
+from storage import StatisticSaver
 
 FILES_DIR = "generated"
+OUT_FILE = "out.json"
 
 logging.basicConfig(level=logging.DEBUG)
 
-async def main():
+async def main() -> None:
     queue = asyncio.Queue(500)
     processor_stop_event = asyncio.Event()
     counter_condition = asyncio.Condition()
@@ -30,7 +32,9 @@ async def main():
     else:
         results = list(chain.from_iterable(process_task.result()))
         logging.debug(f"Get {len(results)} results")
-        # to do save results to json
+        
+        saver = StatisticSaver()
+        await saver.saveStatistic(OUT_FILE, results)
 
 
 if __name__ == "__main__":
