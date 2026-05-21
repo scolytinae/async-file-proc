@@ -3,11 +3,10 @@ import aiofiles
 import logging
 import statistics
 from functools import reduce
-from itertools import chain, accumulate
 from model import FileProcessingResult
 
 class StatisticSaver:
-    
+
     '''
     Считаем общую статистику по полученным результатам
     '''
