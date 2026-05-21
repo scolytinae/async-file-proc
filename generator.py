@@ -21,7 +21,7 @@ async def generate_file(file_name: str, words_count: int) -> None:
 
         word_length = random.randint(MIN_WORD_SIZE, MAX_WORD_SIZE)
         random_str = ''.join(random.choices(string.ascii_lowercase, k=word_length))
-        await f.write(random_str + ' ')
+        await f.write(random_str)
 
     print(f"File '{file_name}' generated!")
 
