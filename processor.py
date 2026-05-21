@@ -15,7 +15,6 @@ class Processor:
         self.__work_timeout = 2.0
         self.__queue = queue
         self.__stop_event = stop_event
-        self.__results = []
         self.__processed_count = 0
         self.__processed_condition = processed_condition
 
