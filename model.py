@@ -9,5 +9,5 @@ class FileProcessingResult(BaseModel):
     file_name: str
     words_count: int
     average_word_length: int
-    # words_top: Dict[str, int]
+    words_top: Dict[str, int]
     

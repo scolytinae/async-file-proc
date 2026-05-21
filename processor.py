@@ -32,11 +32,10 @@ class Processor:
                 words_dict[word] = 1
 
         sorted_by_count = sorted(words_dict.items(), key=lambda item: item[1], reverse=True)
-        sorted_by_len = sorted(words_dict.keys(), key=lambda item: len(item))
         return FileProcessingResult(
             file_name=read_result.file_name,
             words_count=words_count,
-            # words_top=dict(sorted_by_count[:10]),
+            words_top=dict(sorted_by_count[:10]),
             average_word_length=statistics.median(words_len)
         )
 
