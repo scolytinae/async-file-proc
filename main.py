@@ -1,41 +1,44 @@
 import asyncio
 import logging
-from itertools import chain
-from reader import ThreadedReader
+
 from processor import Processor
+from reader import ThreadedReader
 from storage import StatisticSaver
 
 FILES_DIR = "generated"
 OUT_FILE = "out.json"
+QUEUE_SIZE = 500
+WORKERS_COUNT = 5
+READER_THREADS = 5
+WORK_TIMEOUT_SEC = 2.0
 
-logging.basicConfig(level=logging.DEBUG)
 
 async def main() -> None:
-    queue = asyncio.Queue(500)
-    processor_stop_event = asyncio.Event()
-    counter_condition = asyncio.Condition()
-    reader = ThreadedReader(queue)
-    processor = Processor(queue, processor_stop_event, counter_condition)
+    queue: asyncio.Queue = asyncio.Queue(QUEUE_SIZE)
+    reader = ThreadedReader(queue, max_workers=READER_THREADS)
+    processor = Processor(
+        queue,
+        workers_count=WORKERS_COUNT,
+        work_timeout=WORK_TIMEOUT_SEC,
+    )
+
     try:
-        async with asyncio.TaskGroup() as group:
-            read_task = group.create_task(reader.read_files(FILES_DIR))
-            process_task = group.create_task(processor.process())
+        async with processor:
+            files_count = await reader.read_files(FILES_DIR)
+            logging.info("Files read: %d", files_count)
+    except Exception:
+        logging.exception("Pipeline failed")
 
-            readed_files_count = await read_task
-            logging.debug(f"Files readed: {readed_files_count}")
-            async with counter_condition:
-                await counter_condition.wait_for(lambda: processor.processed_count() >= readed_files_count)
-                processor_stop_event.set()
+    results = processor.results
+    logging.info("Got %d results", len(results))
 
-    except* ValueError as eg:
-        logging.warning(f"Errors in tasks: {eg.exceptions}") 
-    else:
-        results = list(chain.from_iterable(process_task.result()))
-        logging.debug(f"Get {len(results)} results")
-        
-        saver = StatisticSaver()
-        await saver.saveStatistic(OUT_FILE, results)
+    if results:
+        await StatisticSaver().save_statistic(OUT_FILE, results)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
     asyncio.run(main())
