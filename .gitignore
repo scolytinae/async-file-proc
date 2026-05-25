@@ -9,6 +9,7 @@ wheels/
 # Virtual environments
 .venv
 
-# genrated files
+# generated files
 generated/
 out.json
+*.zip
